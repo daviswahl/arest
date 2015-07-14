@@ -1,9 +1,8 @@
 module Arest
   module Visitors
 
-    class Hasher
+    class Hasher < Visitor
       require "json"
-      include Arest::Visitor
 
       def to_json
         @hash.to_json

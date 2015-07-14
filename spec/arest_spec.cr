@@ -5,8 +5,9 @@ describe Arest do
 
   it "works" do
     e = Arest::Entity.new(:butts)
-    e.where(e[:bar].eq(e[:bats]))
-    puts e.inspect
+    e = e.where(e[:bar].eq(e[:bats]))
+    e.each { |n| n.inspect  }
+
 #    false.should eq(true)
   end
 end

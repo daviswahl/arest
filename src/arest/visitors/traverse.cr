@@ -1,35 +1,33 @@
 module Arest
   module Visitors
-    class Traverse
-      include Arest::Visitor
+    class Traverse < Visitor
 
-      def visit_node_field o
+      def visit(o : Arest::AST::Nodes::Field, &blk : Arest::AST::Node ->)
+        yield (o)
+      end
+
+      def visit(o : Arest::AST::Nodes::Value, &blk : Arest::AST::Node ->)
         yield o
       end
 
-      def visit_node_value o
-        yield o
+      def visit(o : Arest::AST::Nodes::Query, &blk : Arest::AST::Node ->)
+        o.root.accept(self, &blk)
+        blk.call o
       end
 
-      def visit_node_query o, &blk
-        yield o, visit(o.root, &blk)
+     # def visit(o : Arest::AST::Nodes::Unary, &blk)
+     #   yield o
+     # end
+
+      def visit(o : Arest::AST::Nodes::Nary, &blk : Arest::AST::Node ->)
+        o.children.map { |child| child.accept(self, &blk) }
+        blk.call(o)
       end
 
-      def visit_unary_not o, &blk
-        yield o, visit(o.root)
-      end
-
-      def visit_nary o, &blk
-        yield o, o.children.map { |child| visit child, &blk }
-      end
-
-      alias_method :visit_nary_or, :visit_nary
-      alias_method :visit_nary_and, :visit_nary
-      alias_method :visit_nary_all, :visit_nary
-      alias_method :visit_nary_any, :visit_nary
-
-      def visit_binop_eq o, &blk
-        yield o, visit(o.left, &blk), visit(o.right, &blk)
+      def visit(o : Arest::AST::Nodes::BinOp, &blk : Arest::AST::Node ->)
+        o.left.accept(self, &blk)
+        o.right.accept(self, &blk)
+        blk.call(o)
       end
     end
   end

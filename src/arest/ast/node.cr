@@ -1,12 +1,15 @@
 module Arest
   module AST
-    class Node(T)
-      include Enumerable(T)
+    class Node
+      #include Enumerable(T)
 
-      def each
-        Arest::Visitors::Traverse.new.visit(self) do |node, args|
-          yield(node, args)
-        end
+      def accept(visitor : Visitor, &blk : Arest::AST::Node ->)
+        visitor.visit(self, &blk)
+      end
+
+      def each(&blk : Arest::AST::Node ->)
+        visitor = Arest::Visitors::Traverse.new
+        accept(visitor, &blk)
       end
 
       def self.visitor_prefix
@@ -29,8 +32,8 @@ module Arest
         Nodes::Or.new(self, right)
       end
 
-      def and *right
-        Nodes::And.new(self, right)
+      def and *right : Node
+        Nodes::And.new(self, *right)
       end
       alias_method :where, :and
 
