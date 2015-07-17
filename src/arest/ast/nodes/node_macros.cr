@@ -7,8 +7,8 @@ module Arest
     {% end %}
       end
       macro has_node(klass)
-        def {{klass.id}}(*args : Node | Int32 | String)
-    {{klass.id.capitalize}}.new(self, *args)
+        def {{klass.id}}(args : Node | Number | String)
+    {{klass.id.capitalize}}.new(self, args)
   end
 end
 end

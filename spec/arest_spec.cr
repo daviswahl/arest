@@ -5,8 +5,9 @@ describe Arest do
 
   it "works" do
     e = Arest::Entity.new(:butts)
-    e = e.where(e[:bar].eq(e[:bats]))
-    e.each { |n| n.inspect  }
+    e = e.where(e[:bar].eq(e[:bats]).and(e[:fas].eq(10)))
+    hasher = Arest::Visitors::Hasher.new
+    e.each { |n| n.accept(hasher) }
 
 #    false.should eq(true)
   end

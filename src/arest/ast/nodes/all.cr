@@ -10,21 +10,31 @@ module Arest
         end
       end
 
-      class Nary < Arest::AST::Node
+      class Nary(Field | Value) < Arest::AST::Node
 
         getter :children
 
-        def initialize(left : Node, *args : Node | String | Int32 )
+        def initialize(left : Node, args : Node)
           @children = [left, args].compact
         end
       end
 
       class BinOp < Arest::AST::Node
-        getter :left, :right
+        getter :left
+
+        def right : Field | Value
+          @right
+        end
 
         def initialize(left, right)
           @left = left
-          @right = right.is_a?(Field) ? right.set_rfield : Value.new(right)
+          @right = Value.new right
+        end
+
+        def initialize(left, right : Field)
+          @left = left
+          right.set_rfield
+          @right = right
         end
       end
 
@@ -47,7 +57,6 @@ module Arest
 
         def set_rfield
           @key = :rfield
-          self
         end
       end
 
@@ -60,10 +69,10 @@ module Arest
         end
       end
 
-      class Value < Arest::AST::Node
+      class Value(T) < Arest::AST::Node
         getter :value
 
-        def initialize(value)
+        def initialize(value )
           @value = value
         end
       end

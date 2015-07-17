@@ -3,13 +3,13 @@ module Arest
     class Node
       #include Enumerable(T)
 
-      def accept(visitor : Visitor, &blk : Arest::AST::Node ->)
-        visitor.visit(self, &blk)
+      def accept(visitor : Visitor)
+        visitor.visit(self)
       end
 
-      def each(&blk : Arest::AST::Node ->)
-        visitor = Arest::Visitors::Traverse.new
-        accept(visitor, &blk)
+      def each(&blk : Node ->)
+        visitor = Arest::Visitors::Traverse.new(&blk)
+        accept(visitor)
       end
 
       def self.visitor_prefix
@@ -21,19 +21,19 @@ module Arest
       end
 
       def any *right
-        Nodes::Any.new(self, right)
+        Nodes::Any.new(self, *right)
       end
 
       def all *right
-        Nodes::All.new(self, right)
+        Nodes::All.new(self, *right)
       end
 
       def or *right
-        Nodes::Or.new(self, right)
+        Nodes::Or.new(self, *right)
       end
 
-      def and *right : Node
-        Nodes::And.new(self, *right)
+      def and right : Node
+        Nodes::And.new(self, right)
       end
       alias_method :where, :and
 

@@ -1,17 +1,24 @@
 module Arest
   module Visitors
     class Traverse < Visitor
-
-      def visit(o : Arest::AST::Nodes::Field, &blk : Arest::AST::Node ->)
-        yield (o)
+      def blk
+        @blk
       end
 
-      def visit(o : Arest::AST::Nodes::Value, &blk : Arest::AST::Node ->)
-        yield o
+      def initialize(&blk : Arest::AST::Node -> _)
+       @blk = blk
       end
 
-      def visit(o : Arest::AST::Nodes::Query, &blk : Arest::AST::Node ->)
-        o.root.accept(self, &blk)
+      def visit(o : Arest::AST::Nodes::Field)
+        blk.call(o)
+      end
+
+      def visit(o : Arest::AST::Nodes::Value)
+        blk.call o
+      end
+
+      def visit(o : Arest::AST::Nodes::Query)
+        visit(o.root)
         blk.call o
       end
 
@@ -19,15 +26,15 @@ module Arest
      #   yield o
      # end
 
-      def visit(o : Arest::AST::Nodes::Nary, &blk : Arest::AST::Node ->)
-        o.children.map { |child| child.accept(self, &blk) }
-        blk.call(o)
+      def visit(o : Arest::AST::Nodes::Nary)
+        o.children.each { |child| visit child }
+        blk.call o
       end
 
-      def visit(o : Arest::AST::Nodes::BinOp, &blk : Arest::AST::Node ->)
-        o.left.accept(self, &blk)
-        o.right.accept(self, &blk)
-        blk.call(o)
+      def visit(o : Arest::AST::Nodes::BinOp)
+       visit(o.left)
+       visit(o.right)
+       blk.call o
       end
     end
   end

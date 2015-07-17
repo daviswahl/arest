@@ -12,16 +12,19 @@ module Arest
         @hash
       end
 
-      def visit_node_field o
-        @hash = { o.key => o.field }
+      def visit(o : Arest::AST::Node)
+        puts o.inspect
+      end
+      def visit(o : Arest::AST::Nodes::Field)
+       puts o.inspect 
       end
 
-      def visit_node_value o
+      def visit(o : Arest::AST::Nodes::Value)
         @hash = { rvalue:  o.value }
       end
 
-      def visit_binop_eq o, left, right
-        @hash = { op:  "$eq" }.merge(left).merge(right)
+      def visit(o : Arest::AST::Nodes::Eq)
+        puts o.inspect 
       end
 
       def visit_nary_and o, children
@@ -36,8 +39,8 @@ module Arest
         @hash = { "$all" => children }
       end
 
-      def visit_node_query o, root
-        @hash = root
+      def visit(o : Arest::AST::Nodes::Query)
+       puts o.inspect
       end
     end
   end
