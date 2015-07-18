@@ -1,25 +1,29 @@
 module Arest
   module Visitors
+
     class Traverse < Visitor
       def blk
         @blk
       end
 
       def initialize(&blk : Arest::AST::Node -> _)
-       @blk = blk
+        @blk = blk
       end
-
+      
       def visit(o : Arest::AST::Nodes::Field)
-        blk.call(o)
+         blk.call(o)
       end
 
-      def visit(o : Arest::AST::Nodes::Value)
-        blk.call o
+      def visit(o : Arest::AST::Node)
+        raise Exception.new(o.inspect)
+      end
+
+      def visit(o : Arest::AST::Nodes::Literal)
+        blk.call(o)
       end
 
       def visit(o : Arest::AST::Nodes::Query)
         visit(o.root)
-        blk.call o
       end
 
      # def visit(o : Arest::AST::Nodes::Unary, &blk)
@@ -28,7 +32,7 @@ module Arest
 
       def visit(o : Arest::AST::Nodes::Nary)
         o.children.each { |child| visit child }
-        blk.call o
+        blk.call(o)
       end
 
       def visit(o : Arest::AST::Nodes::BinOp)

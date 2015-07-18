@@ -1,13 +1,14 @@
 module Arest
   module AST
-    class Node
+    abstract class Node
       #include Enumerable(T)
+    abstract def token
 
       def accept(visitor : Visitor)
         visitor.visit(self)
       end
-
-      def each(&blk : Node ->)
+      
+      def each(&blk : Arest::AST::Node ->_)
         visitor = Arest::Visitors::Traverse.new(&blk)
         accept(visitor)
       end
@@ -32,17 +33,16 @@ module Arest
         Nodes::Or.new(self, *right)
       end
 
-      def and right : Node
+      def and right : Arest::AST::Node
         Nodes::And.new(self, right)
       end
       alias_method :where, :and
 
       def build
         hasher = Arest::Visitors::Hasher.new
-        each do |node, args|
-          hasher.visit(node, args)
+        each do |node|
+          hasher.visit(node)
         end
-        hasher.data
       end
 
       def to_json
