@@ -15,7 +15,7 @@ module Arest
       end
 
       def visit(o : Arest::AST::Node)
-        raise Exception.new(o.inspect)
+#        raise Exception.new(o.inspect)
       end
 
       def visit(o : Arest::AST::Nodes::Literal)

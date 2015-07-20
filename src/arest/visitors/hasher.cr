@@ -12,35 +12,48 @@ module Arest
         @hash 
       end
 
-      def visit(o : Arest::AST::Nodes::Literal) : Value
-        { "value" as Key => o.value as Value}
+      def visit(o : Arest::AST::Nodes::Literal) : ValueHash
+        h = ValueHash.new
+        h["value"] = o.value
+        h
       end
 
-      def visit(o : Arest::AST::Nodes::Field) : Value
-        { o.key as Key  => o.field as Value } 
+      def visit(o : Arest::AST::Nodes::Field) : ValueHash
+        h = ValueHash.new
+        h[o.key] = o.field 
+        h
       end
 
-      def visit(o : Arest::AST::Nodes::Nary) :  Value
-        arr = [] of Value
-        o.children.each{|x| arr << (visit x) }
-        { o.token as Key => arr as Value} as Value
+      def visit(o : Arest::AST::Nodes::Nary) :  ValueHash
+        h = ValueHash.new
+        children = o.children.inject(ValueHash.new) do |acc, x| 
+          puts x.inspect
+          acc.merge(visit(x))
+          acc
+        end
+        #h[o.token] = children  
+        puts h.inspect
+        h
       end
 
-      def visit(o : Arest::AST::Nodes::BinOp) :  Value
-        l = visit(o.left)
-        r = visit(o.right)
-        h = { l.first_key => l.first_value as Value, r.first_key => r.first_value as Value } 
-        op = ("$op") as Key
-        h[op] = o.token as Value
-        h as Value 
+      def visit(o : Arest::AST::Nodes::BinOp) :  ValueHash
+        h = ValueHash.new
+        h.merge visit(o.left)
+        h.merge visit(o.right)
+        #puts r.inspect
+
+        h["$op"] = o.token
+        h
       end
 
-      def visit(o : Arest::AST::Nodes::Unary) : Value
+      def visit(o : Arest::AST::Nodes::Unary) : ValueHash
          { "$not" => o.children.map{|x| visit x } } as Value
       end
 
-      def visit(o : Arest::AST::Nodes::Query) : Value
-        visit o.root
+      def visit(o : Arest::AST::Nodes::Query) : ValueHash
+        h = ValueHash.new
+        h.merge(visit o.root)
+        h
       end
     end
   end

@@ -7,7 +7,23 @@ module Arest
       module Types
         alias Key = String | Symbol
         alias Primitive = String | Bool | Int64 | Int32 | Float64 | Symbol
-        alias Value = Primitive | Hash(Key, Value) | Array(Value)
+
+        class ValueHash < Hash(Key, Arest::AST::Nodes::Types::Value)
+          def []=(key : String | Symbol, value)
+            puts key, value
+          end
+          def merge(other)
+            merge(other as ValueHash)
+            self
+          end
+          def merge(other : Hash(Key, Value | Array(Value)))
+            other = other as ValueHash
+            self[other.first_key] = other.first_value
+            puts self
+            self 
+          end
+        end
+        alias Value = Primitive | Hash(Key, Value) | Array(Value) | ValueHash
       end
       include Types
 
@@ -35,7 +51,7 @@ module Arest
 
       abstract class BinOp < Arest::AST::Node
         getter :left
-        getter :right
+        getter :right 
         def initialize(@left : Field, @right : Literal); end
 
         def initialize(@left : Field, @right : Field)
